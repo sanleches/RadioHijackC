@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include "dhcp_server.hpp"
-#include "status_led.hpp"
+#include "net/dhcp_server.hpp"
+#include "ui/status_led.hpp"
 
 #include <string>
 

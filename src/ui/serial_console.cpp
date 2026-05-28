@@ -19,10 +19,10 @@
  * @brief Non-blocking serial status console implementation.
  */
 
-#include "serial_console.hpp"
+#include "ui/serial_console.hpp"
 
-#include "app_config.hpp"
-#include "logger.hpp"
+#include "config/app_config.hpp"
+#include "util/logger.hpp"
 
 #include "pico/stdlib.h"
 

@@ -25,15 +25,15 @@
  * owns the main loop.
  */
 
-#include "api_router.hpp"
-#include "app_config.hpp"
-#include "logger.hpp"
-#include "preset_store.hpp"
-#include "rda5807m.hpp"
-#include "serial_console.hpp"
-#include "status_led.hpp"
-#include "web_server.hpp"
-#include "wifi_manager.hpp"
+#include "config/app_config.hpp"
+#include "net/api_router.hpp"
+#include "net/web_server.hpp"
+#include "net/wifi_manager.hpp"
+#include "radio/rda5807m.hpp"
+#include "storage/preset_store.hpp"
+#include "ui/serial_console.hpp"
+#include "ui/status_led.hpp"
+#include "util/logger.hpp"
 
 #include "hardware/i2c.h"
 #include "pico/stdlib.h"

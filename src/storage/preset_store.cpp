@@ -21,10 +21,10 @@
  * @brief Flash persistence implementation for station presets.
  */
 
-#include "preset_store.hpp"
+#include "storage/preset_store.hpp"
 
-#include "app_config.hpp"
-#include "logger.hpp"
+#include "config/app_config.hpp"
+#include "util/logger.hpp"
 
 #include <algorithm>
 #include <array>

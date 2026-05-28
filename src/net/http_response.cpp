@@ -18,7 +18,7 @@
  * @brief HTTP response construction and serialization implementation.
  */
 
-#include "http_response.hpp"
+#include "net/http_response.hpp"
 
 #include <cstdio>
 #include <utility>

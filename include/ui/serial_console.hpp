@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include "rda5807m.hpp"
-#include "wifi_manager.hpp"
+#include "net/wifi_manager.hpp"
+#include "radio/rda5807m.hpp"
 
 #include "pico/time.h"
 

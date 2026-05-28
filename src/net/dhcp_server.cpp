@@ -20,9 +20,9 @@
  * @brief Minimal DHCP OFFER/ACK responder used by fallback AP mode.
  */
 
-#include "dhcp_server.hpp"
+#include "net/dhcp_server.hpp"
 
-#include "logger.hpp"
+#include "util/logger.hpp"
 
 #include <array>
 #include <cstring>

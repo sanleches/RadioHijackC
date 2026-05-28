@@ -54,19 +54,19 @@ pico_sdk_init()
 
 add_executable(RadioHijackC
         src/main.cpp
-        src/api_router.cpp
-        src/dhcp_server.cpp
-        src/http_response.cpp
-        src/logger.cpp
-        src/preset_store.cpp
-        src/rda5807m.cpp
-        src/rds_parser.cpp
-        src/serial_console.cpp
-        src/status_led.cpp
-        src/url.cpp
-        src/web_page.cpp
-        src/web_server.cpp
-        src/wifi_manager.cpp
+        src/net/api_router.cpp
+        src/net/dhcp_server.cpp
+        src/net/http_response.cpp
+        src/net/web_server.cpp
+        src/net/wifi_manager.cpp
+        src/radio/rda5807m.cpp
+        src/radio/rds_parser.cpp
+        src/storage/preset_store.cpp
+        src/ui/serial_console.cpp
+        src/ui/status_led.cpp
+        src/ui/web_page.cpp
+        src/util/logger.cpp
+        src/util/url.cpp
 )
 
 pico_set_program_name(RadioHijackC "RadioHijackC")

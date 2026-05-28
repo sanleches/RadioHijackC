@@ -16,7 +16,7 @@
  * @brief USB serial logging implementation.
  */
 
-#include "logger.hpp"
+#include "util/logger.hpp"
 
 #include <cstdarg>
 #include <cstdio>

@@ -21,10 +21,10 @@
  * @brief RDA5807M I2C radio driver implementation.
  */
 
-#include "rda5807m.hpp"
+#include "radio/rda5807m.hpp"
 
-#include "app_config.hpp"
-#include "logger.hpp"
+#include "config/app_config.hpp"
+#include "util/logger.hpp"
 
 #include <algorithm>
 #include <cmath>

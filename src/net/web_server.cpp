@@ -20,13 +20,13 @@
  * @brief Raw lwIP TCP HTTP server implementation.
  */
 
-#include "web_server.hpp"
+#include "net/web_server.hpp"
 
-#include "app_config.hpp"
-#include "http_response.hpp"
-#include "logger.hpp"
-#include "url.hpp"
-#include "web_page.hpp"
+#include "config/app_config.hpp"
+#include "net/http_response.hpp"
+#include "ui/web_page.hpp"
+#include "util/logger.hpp"
+#include "util/url.hpp"
 
 #include <algorithm>
 #include <string>

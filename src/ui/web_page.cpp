@@ -20,7 +20,7 @@
  * @brief Contains the complete embedded dashboard served at / and /index.html.
  */
 
-#include "web_page.hpp"
+#include "ui/web_page.hpp"
 
 namespace app {
 

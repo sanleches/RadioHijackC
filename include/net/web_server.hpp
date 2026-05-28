@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include "api_router.hpp"
-#include "serial_console.hpp"
-#include "status_led.hpp"
+#include "net/api_router.hpp"
+#include "ui/serial_console.hpp"
+#include "ui/status_led.hpp"
 
 namespace app {
 

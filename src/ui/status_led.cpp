@@ -18,7 +18,7 @@
  * @brief Pico W onboard LED status pattern implementation.
  */
 
-#include "status_led.hpp"
+#include "ui/status_led.hpp"
 
 #include "pico/cyw43_arch.h"
 

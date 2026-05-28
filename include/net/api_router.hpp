@@ -23,10 +23,10 @@
 
 #pragma once
 
-#include "http_response.hpp"
-#include "preset_store.hpp"
-#include "rda5807m.hpp"
-#include "url.hpp"
+#include "net/http_response.hpp"
+#include "radio/rda5807m.hpp"
+#include "storage/preset_store.hpp"
+#include "util/url.hpp"
 
 #include <string>
 

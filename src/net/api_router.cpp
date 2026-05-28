@@ -21,10 +21,10 @@
  * @brief HTTP API implementation for radio controls and preset management.
  */
 
-#include "api_router.hpp"
+#include "net/api_router.hpp"
 
-#include "app_config.hpp"
-#include "logger.hpp"
+#include "config/app_config.hpp"
+#include "util/logger.hpp"
 
 #include <algorithm>
 #include <cmath>

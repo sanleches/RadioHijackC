@@ -20,7 +20,7 @@
  * @brief RDS group parsing implementation for station name and RadioText.
  */
 
-#include "rds_parser.hpp"
+#include "radio/rds_parser.hpp"
 
 #include <algorithm>
 

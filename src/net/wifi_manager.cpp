@@ -21,10 +21,10 @@
  * @brief CYW43 Wi-Fi station/AP setup implementation.
  */
 
-#include "wifi_manager.hpp"
+#include "net/wifi_manager.hpp"
 
-#include "app_config.hpp"
-#include "logger.hpp"
+#include "config/app_config.hpp"
+#include "util/logger.hpp"
 
 #include "pico/cyw43_arch.h"
 #include "pico/stdlib.h"
