@@ -1,4 +1,21 @@
-# Generated Cmake Pico project file
+# =============================================================================
+# RadioHijackC - Pico SDK Build Configuration
+# =============================================================================
+#
+# Board:  Raspberry Pi Pico 2 W (RP2350)
+# Stack:  Pico SDK 2.2.0 + CYW43 Wi-Fi + lwIP raw API
+#
+# Purpose:
+#   Configure, build, and package the RadioHijackC firmware.
+#
+# Build responsibilities:
+#   Select C/C++ standards, import Pico SDK, set PICO_BOARD, declare all source
+#   modules, enable USB serial, link hardware/Wi-Fi/lwIP libraries, and generate
+#   deployable UF2/BIN/HEX outputs.
+#
+# Key output:
+#   build/RadioHijackC.uf2
+# =============================================================================
 
 cmake_minimum_required(VERSION 3.13)
 

@@ -1,9 +1,34 @@
+/*
+ * =============================================================================
+ * RadioHijackC - URL Helper Implementation
+ * =============================================================================
+ *
+ * Responsibilities:
+ *   Decode simple URL query strings used by the dashboard fetch() calls.
+ *
+ * Supported decoding:
+ *   '+' to space and '%XX' hexadecimal byte escapes.
+ *
+ * Parser behavior:
+ *   Empty pairs are skipped. Duplicate keys keep the final value.
+ */
+
+/**
+ * @file url.cpp
+ * @brief URL component decoding and query-string parsing implementation.
+ */
+
 #include "url.hpp"
 
 #include <cstdlib>
 
 namespace app {
 
+/**
+ * @brief Decode one URL-encoded component.
+ * @param value Encoded string, with '+' and percent escapes accepted.
+ * @return Decoded string.
+ */
 std::string urlDecode(const std::string& value) {
   std::string result;
   result.reserve(value.size());
@@ -27,6 +52,11 @@ std::string urlDecode(const std::string& value) {
   return result;
 }
 
+/**
+ * @brief Split a query string into decoded key/value pairs.
+ * @param query Query string without a leading '?'.
+ * @return Map of decoded parameter names to decoded values.
+ */
 QueryParams parseQuery(const std::string& query) {
   QueryParams params;
   size_t start = 0;

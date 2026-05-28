@@ -1,3 +1,23 @@
+/*
+ * =============================================================================
+ * RadioHijackC - Application Configuration
+ * =============================================================================
+ *
+ * Board:  Raspberry Pi Pico 2 W (RP2350)
+ * Stack:  Pico SDK 2.2.0 + CYW43 Wi-Fi + lwIP raw API
+ *
+ * Purpose:
+ *   Central index of compile-time settings used by the whole firmware.
+ *
+ * Contains:
+ *   Wi-Fi station credentials, fallback AP credentials, RDA5807M I2C pinout,
+ *   HTTP server constants, default radio settings, and preset limits.
+ *
+ * Edit here when changing:
+ *   Network names/passwords, SDA/SCL pins, default station/volume, HTTP port,
+ *   or maximum preset capacity.
+ */
+
 /**
  * @file app_config.hpp
  * @brief Compile-time configuration for the RadioHijack firmware.

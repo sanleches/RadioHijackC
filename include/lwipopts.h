@@ -1,3 +1,19 @@
+/*
+ * =============================================================================
+ * RadioHijackC - lwIP Configuration
+ * =============================================================================
+ *
+ * Purpose:
+ *   Supplies compile-time lwIP options required by Pico W CYW43 background mode.
+ *
+ * Networking model:
+ *   NO_SYS raw callback API, not sockets or netconn. TCP raw callbacks serve
+ *   HTTP and UDP raw callbacks serve fallback AP DHCP.
+ *
+ * Important choices:
+ *   LWIP_RAW=1, LWIP_TCP=1, LWIP_UDP=1, LWIP_SOCKET=0, LWIP_NETCONN=0.
+ */
+
 /**
  * @file lwipopts.h
  * @brief lwIP compile-time options for Pico W background Wi-Fi mode.

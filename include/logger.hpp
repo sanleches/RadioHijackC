@@ -1,3 +1,18 @@
+/*
+ * =============================================================================
+ * RadioHijackC - Logger Interface
+ * =============================================================================
+ *
+ * Purpose:
+ *   Centralizes formatted serial output so every module logs consistently.
+ *
+ * Output target:
+ *   Pico stdio, configured by CMake for USB serial.
+ *
+ * Main class:
+ *   Logger - Static printf-style one-line logging helper.
+ */
+
 /**
  * @file logger.hpp
  * @brief Small formatted logging wrapper used by all firmware modules.

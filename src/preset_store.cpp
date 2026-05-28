@@ -1,3 +1,26 @@
+/*
+ * =============================================================================
+ * RadioHijackC - Preset Store Implementation
+ * =============================================================================
+ *
+ * Responsibilities:
+ *   Load presets from flash, save presets to flash, provide default station
+ *   presets, and keep preset updates bounded by kMaxPresets.
+ *
+ * Flash layout:
+ *   Last flash sector contains a magic number, version, count, and fixed-size
+ *   preset entries. Frequencies are stored as MHz * 10 integers.
+ *
+ * Safety note:
+ *   Interrupts are disabled during erase/program because code executes from
+ *   external flash on Pico boards.
+ */
+
+/**
+ * @file preset_store.cpp
+ * @brief Flash persistence implementation for station presets.
+ */
+
 #include "preset_store.hpp"
 
 #include "app_config.hpp"
@@ -36,11 +59,27 @@ struct FlashPresetImage {
 
 static_assert(sizeof(FlashPresetImage) <= FLASH_SECTOR_SIZE, "Preset image must fit in one flash sector");
 
+/**
+ * @brief Convert flash integer frequency format to MHz.
+ * @param value Frequency stored as MHz multiplied by 10.
+ * @return Frequency in MHz.
+ */
 float fromStoredFrequency(uint32_t value) { return static_cast<float>(value) / 10.0f; }
+
+/**
+ * @brief Convert MHz frequency to compact flash integer format.
+ * @param value Frequency in MHz.
+ * @return Frequency multiplied by 10 and rounded to nearest integer.
+ */
 uint32_t toStoredFrequency(float value) { return static_cast<uint32_t>(value * 10.0f + 0.5f); }
 
 }  // namespace
 
+/**
+ * @brief Load presets from the last flash sector.
+ * @param None.
+ * @return Nothing. Defaults are loaded if the flash image is invalid or empty.
+ */
 void PresetStore::load() {
   presets_.clear();
   const auto* image = reinterpret_cast<const FlashPresetImage*>(XIP_BASE + kStorageOffset);
@@ -60,6 +99,11 @@ void PresetStore::load() {
   }
 }
 
+/**
+ * @brief Erase and rewrite the preset flash sector.
+ * @param None.
+ * @return true after erase/program completes.
+ */
 bool PresetStore::save() {
   std::array<uint8_t, FLASH_SECTOR_SIZE> sector{};
   sector.fill(0xFF);
@@ -85,6 +129,12 @@ bool PresetStore::save() {
   return true;
 }
 
+/**
+ * @brief Insert or replace one preset in RAM.
+ * @param name Preset name used as the unique key.
+ * @param frequency Frequency in MHz.
+ * @return Nothing.
+ */
 void PresetStore::set(const std::string& name, float frequency) {
   auto existing = std::find_if(presets_.begin(), presets_.end(), [&](const Preset& preset) {
     return preset.name == name;
@@ -99,6 +149,11 @@ void PresetStore::set(const std::string& name, float frequency) {
   presets_.push_back({name, frequency});
 }
 
+/**
+ * @brief Remove a preset by exact name.
+ * @param name Preset name to delete.
+ * @return true if a preset was removed.
+ */
 bool PresetStore::remove(const std::string& name) {
   const auto before = presets_.size();
   presets_.erase(std::remove_if(presets_.begin(), presets_.end(), [&](const Preset& preset) {
@@ -108,6 +163,11 @@ bool PresetStore::remove(const std::string& name) {
   return presets_.size() != before;
 }
 
+/**
+ * @brief Load the built-in station list used by the original Python version.
+ * @param None.
+ * @return Nothing.
+ */
 void PresetStore::loadDefaults() {
   presets_ = {{"Hot 89.9", 89.9f},       {"CBC Radio One 91.5", 91.5f},
               {"Boom 99.7", 99.7f},      {"Majic 100.3", 100.3f},

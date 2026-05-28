@@ -1,7 +1,34 @@
+/*
+ * =============================================================================
+ * RadioHijackC - Embedded Dashboard Implementation
+ * =============================================================================
+ *
+ * Responsibilities:
+ *   Store and return the complete browser dashboard as a static raw string.
+ *
+ * Dashboard features:
+ *   Manual tune, seek up/down, step tune, volume slider, mute, scan results,
+ *   presets, RDS station/song text, RSSI, stereo/RDS indicators, and IP display.
+ *
+ * API dependency:
+ *   Uses fetch() against /status, /tune, /seek, /vol, /step, /scanhtml,
+ *   /mute, and /presets.
+ */
+
+/**
+ * @file web_page.cpp
+ * @brief Contains the complete embedded dashboard served at / and /index.html.
+ */
+
 #include "web_page.hpp"
 
 namespace app {
 
+/**
+ * @brief Return the static browser dashboard HTML.
+ * @param None.
+ * @return Pointer to a flash-resident null-terminated HTML document.
+ */
 const char* webPageHtml() {
   return R"HTML(<!DOCTYPE html>
 <html lang="en">

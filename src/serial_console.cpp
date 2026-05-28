@@ -1,3 +1,24 @@
+/*
+ * =============================================================================
+ * RadioHijackC - Serial Status Console Implementation
+ * =============================================================================
+ *
+ * Responsibilities:
+ *   Keep the dashboard address discoverable even if the serial terminal opens
+ *   after boot.
+ *
+ * Commands:
+ *   s, S, ? - Print network mode, web URL, and radio state immediately.
+ *
+ * Periodic output:
+ *   Reprints status every 60 seconds without blocking the web server.
+ */
+
+/**
+ * @file serial_console.cpp
+ * @brief Non-blocking serial status console implementation.
+ */
+
 #include "serial_console.hpp"
 
 #include "app_config.hpp"
@@ -7,9 +28,16 @@
 
 namespace app {
 
+/**
+ * @brief Bind the console to radio and Wi-Fi state providers.
+ * @param radio Optional radio pointer.
+ * @param wifi Wi-Fi manager reference.
+ * @return Constructed console object.
+ */
 SerialConsole::SerialConsole(Rda5807m* radio, const WifiManager& wifi)
     : radio_(radio), wifi_(wifi), nextReport_(make_timeout_time_ms(kPeriodicReportMs)) {}
 
+/** @brief Handle pending serial input and timed reports. @param None. @return Nothing. */
 void SerialConsole::poll() {
   int input = getchar_timeout_us(0);
   while (input != PICO_ERROR_TIMEOUT) {
@@ -25,6 +53,7 @@ void SerialConsole::poll() {
   }
 }
 
+/** @brief Print current webpage and radio status. @param None. @return Nothing. */
 void SerialConsole::printStatus() {
   Logger::info("================ RadioHijack Status ================");
   if (wifi_.accessPointMode()) {

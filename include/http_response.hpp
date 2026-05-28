@@ -1,3 +1,19 @@
+/*
+ * =============================================================================
+ * RadioHijackC - HTTP Response Builder Interface
+ * =============================================================================
+ *
+ * Purpose:
+ *   Provides a small HTTP/1.0 response object for the raw lwIP web server.
+ *
+ * Response types:
+ *   HTML page, HTML fragment, JSON, plain text, and standard 404.
+ *
+ * Main class:
+ *   HttpResponse - Stores status, reason, content type, body, and serializes
+ *   them into bytes suitable for tcp_write().
+ */
+
 /**
  * @file http_response.hpp
  * @brief Lightweight HTTP/1.0 response builder used by the raw TCP server.

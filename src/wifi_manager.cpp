@@ -1,3 +1,25 @@
+/*
+ * =============================================================================
+ * RadioHijackC - Wi-Fi Manager Implementation
+ * =============================================================================
+ *
+ * Responsibilities:
+ *   Initialize CYW43, connect to configured Wi-Fi as a station, report the DHCP
+ *   address, or start the fallback self-hosted AP and DHCP server.
+ *
+ * Mode selection:
+ *   Station mode is attempted first. AP mode starts only when credentials are
+ *   missing or connection times out/fails.
+ *
+ * Reported address:
+ *   Station DHCP IP or fallback AP gateway 192.168.4.1.
+ */
+
+/**
+ * @file wifi_manager.cpp
+ * @brief CYW43 Wi-Fi station/AP setup implementation.
+ */
+
 #include "wifi_manager.hpp"
 
 #include "app_config.hpp"
@@ -9,6 +31,7 @@
 
 namespace app {
 
+/** @brief Initialize CYW43 Wi-Fi support. @param None. @return true if initialized. */
 bool WifiManager::begin() {
   if (initialized_) {
     return true;
@@ -21,6 +44,11 @@ bool WifiManager::begin() {
   return true;
 }
 
+/**
+ * @brief Try configured station Wi-Fi first, then fall back to access point mode.
+ * @param None.
+ * @return Dashboard IP address.
+ */
 std::string WifiManager::connectOrStartAccessPoint() {
   if (!begin()) {
     return ipAddress_;
@@ -45,6 +73,7 @@ std::string WifiManager::connectOrStartAccessPoint() {
   return startAccessPoint();
 }
 
+/** @brief Read station-mode IP from lwIP. @param None. @return IPv4 address string. */
 std::string WifiManager::currentStaIp() const {
   if (netif_default == nullptr) {
     return "0.0.0.0";
@@ -53,6 +82,7 @@ std::string WifiManager::currentStaIp() const {
   return ip ? std::string(ip) : std::string("0.0.0.0");
 }
 
+/** @brief Enable fallback AP and DHCP server. @param None. @return AP IP address. */
 std::string WifiManager::startAccessPoint() {
   accessPointMode_ = true;
   cyw43_arch_enable_ap_mode(config::kApSsid, config::kApPassword, CYW43_AUTH_WPA2_AES_PSK);

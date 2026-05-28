@@ -1,3 +1,26 @@
+/*
+ * =============================================================================
+ * RadioHijackC - HTTP API Router Implementation
+ * =============================================================================
+ *
+ * Responsibilities:
+ *   Parse API parameters, call radio/preset operations, and serialize responses
+ *   matching the original MicroPython route behavior.
+ *
+ * Key helpers:
+ *   jsonEscape(), quote(), boolean(), oneDecimal(), getParam(), parseFloat(),
+ *   parseInt(), presetsJson(), statusJson().
+ *
+ * Route methods:
+ *   status(), tune(), seek(), volume(), step(), scan(), scanHtml(), mute(),
+ *   power(), presets().
+ */
+
+/**
+ * @file api_router.cpp
+ * @brief HTTP API implementation for radio controls and preset management.
+ */
+
 #include "api_router.hpp"
 
 #include "app_config.hpp"
@@ -12,6 +35,11 @@
 namespace app {
 namespace {
 
+/**
+ * @brief Escape a string for safe JSON output.
+ * @param value Raw string.
+ * @return JSON-escaped string without surrounding quotes.
+ */
 std::string jsonEscape(const std::string& value) {
   std::string out;
   out.reserve(value.size() + 8);
@@ -28,15 +56,27 @@ std::string jsonEscape(const std::string& value) {
   return out;
 }
 
+/** @brief Quote and escape a JSON string. @param value Raw string. @return Quoted JSON string. */
 std::string quote(const std::string& value) { return "\"" + jsonEscape(value) + "\""; }
+
+/** @brief Convert a boolean to JSON text. @param value Boolean value. @return "true" or "false". */
 std::string boolean(bool value) { return value ? "true" : "false"; }
 
+/** @brief Format a float with one decimal place. @param value Number to format. @return Decimal text. */
 std::string oneDecimal(float value) {
   char buffer[24];
   std::snprintf(buffer, sizeof(buffer), "%.1f", static_cast<double>(value));
   return buffer;
 }
 
+/**
+ * @brief Read a query parameter with optional alias and fallback.
+ * @param params Decoded query parameter map.
+ * @param first Primary parameter name.
+ * @param second Optional alias parameter name, or nullptr.
+ * @param fallback Value returned when neither key exists.
+ * @return Selected parameter value.
+ */
 std::string getParam(const QueryParams& params, const char* first, const char* second, const char* fallback) {
   auto it = params.find(first);
   if (it != params.end()) {
@@ -51,18 +91,21 @@ std::string getParam(const QueryParams& params, const char* first, const char* s
   return fallback;
 }
 
+/** @brief Parse a complete string as float. @param text Input text. @param value Output float. @return true if valid. */
 bool parseFloat(const std::string& text, float& value) {
   char* end = nullptr;
   value = std::strtof(text.c_str(), &end);
   return end != text.c_str() && *end == '\0';
 }
 
+/** @brief Parse a complete string as integer. @param text Input text. @param value Output integer. @return true if valid. */
 bool parseInt(const std::string& text, int& value) {
   char* end = nullptr;
   value = static_cast<int>(std::strtol(text.c_str(), &end, 10));
   return end != text.c_str() && *end == '\0';
 }
 
+/** @brief Serialize preset store as a JSON object. @param store Preset store. @return JSON object text. */
 std::string presetsJson(const PresetStore& store) {
   std::string json = "{";
   bool first = true;
@@ -77,6 +120,13 @@ std::string presetsJson(const PresetStore& store) {
   return json;
 }
 
+/**
+ * @brief Serialize complete radio state as the /status JSON body.
+ * @param status Radio status snapshot.
+ * @param ip Dashboard IP address.
+ * @param presets Preset store to include in the response.
+ * @return JSON object text.
+ */
 std::string statusJson(const RadioStatus& status, const std::string& ip, const PresetStore& presets) {
   std::string json = "{";
   json += "\"powered\":" + boolean(status.powered);
@@ -107,9 +157,17 @@ std::string statusJson(const RadioStatus& status, const std::string& ip, const P
 
 }  // namespace
 
+/**
+ * @brief Store dependencies needed by route handlers.
+ * @param radio Optional radio driver pointer.
+ * @param presets Preset store reference.
+ * @param ipAddress Dashboard IP address string.
+ * @return Constructed router.
+ */
 ApiRouter::ApiRouter(Rda5807m* radio, PresetStore& presets, std::string ipAddress)
     : radio_(radio), presets_(presets), ipAddress_(std::move(ipAddress)) {}
 
+/** @brief Dispatch an API path to its handler. @param path URL path. @param params Query parameters. @return HTTP response. */
 HttpResponse ApiRouter::handle(const std::string& path, const QueryParams& params) {
   if (path == "/status" || path == "/api/status") return status();
   if (path == "/tune" || path == "/api/tune") return tune(params);
@@ -124,17 +182,20 @@ HttpResponse ApiRouter::handle(const std::string& path, const QueryParams& param
   return HttpResponse::notFound();
 }
 
+/** @brief Poll radio RDS while the server is idle. @param None. @return Nothing. */
 void ApiRouter::pollRadioRds() {
   if (radio_) {
     radio_->pollRds();
   }
 }
 
+/** @brief Build radio-unavailable JSON error. @param None. @return HTTP error response. */
 HttpResponse ApiRouter::requireRadio() const {
   return HttpResponse::json("{\"result\":\"error\",\"message\":\"Radio not initialized\"}", 500,
                             "Internal Server Error");
 }
 
+/** @brief Handle status requests. @param None. @return JSON status response. */
 HttpResponse ApiRouter::status() {
   if (!radio_) {
     std::string json = "{\"result\":\"error\",\"message\":\"Radio not initialized\",\"ip\":" + quote(ipAddress_) +
@@ -144,6 +205,7 @@ HttpResponse ApiRouter::status() {
   return HttpResponse::json(statusJson(radio_->status(), ipAddress_, presets_));
 }
 
+/** @brief Handle tune requests. @param params Query parameters with f/freq. @return JSON tune response. */
 HttpResponse ApiRouter::tune(const QueryParams& params) {
   if (!radio_) return requireRadio();
   float freq = config::kDefaultFrequencyMhz;
@@ -154,6 +216,7 @@ HttpResponse ApiRouter::tune(const QueryParams& params) {
   return HttpResponse::json("{\"result\":\"ok\",\"frequency\":" + oneDecimal(tuned) + ",\"freq\":" + oneDecimal(tuned) + "}");
 }
 
+/** @brief Handle seek requests. @param params Query parameters with dir. @return JSON seek response. */
 HttpResponse ApiRouter::seek(const QueryParams& params) {
   if (!radio_) return requireRadio();
   const std::string direction = getParam(params, "dir", nullptr, "up");
@@ -161,6 +224,7 @@ HttpResponse ApiRouter::seek(const QueryParams& params) {
   return HttpResponse::json("{\"result\":\"ok\",\"frequency\":" + oneDecimal(tuned) + ",\"freq\":" + oneDecimal(tuned) + "}");
 }
 
+/** @brief Handle volume requests. @param params Query parameters with v/vol. @return JSON volume response. */
 HttpResponse ApiRouter::volume(const QueryParams& params) {
   if (!radio_) return requireRadio();
   int vol = config::kDefaultVolume;
@@ -171,6 +235,7 @@ HttpResponse ApiRouter::volume(const QueryParams& params) {
   return HttpResponse::json("{\"result\":\"ok\",\"volume\":" + std::to_string(vol) + ",\"vol\":" + std::to_string(vol) + "}");
 }
 
+/** @brief Handle relative tuning requests. @param params Query parameters with mhz. @return JSON tune response. */
 HttpResponse ApiRouter::step(const QueryParams& params) {
   if (!radio_) return requireRadio();
   float mhz = 0.1f;
@@ -181,6 +246,7 @@ HttpResponse ApiRouter::step(const QueryParams& params) {
   return HttpResponse::json("{\"result\":\"ok\",\"frequency\":" + oneDecimal(tuned) + ",\"freq\":" + oneDecimal(tuned) + "}");
 }
 
+/** @brief Handle scan requests. @param params Range/step/RSSI query parameters. @return JSON station list. */
 HttpResponse ApiRouter::scan(const QueryParams& params) {
   if (!radio_) return requireRadio();
   float start = 87.0f;
@@ -202,6 +268,7 @@ HttpResponse ApiRouter::scan(const QueryParams& params) {
   return HttpResponse::json(json);
 }
 
+/** @brief Handle scan HTML fragment requests. @param params Range/step/RSSI query parameters. @return HTML buttons. */
 HttpResponse ApiRouter::scanHtml(const QueryParams& params) {
   if (!radio_) return HttpResponse::fragment("<div class=\"small\">Radio not initialized</div>");
   float start = 87.0f;
@@ -227,18 +294,21 @@ HttpResponse ApiRouter::scanHtml(const QueryParams& params) {
   return HttpResponse::fragment(html);
 }
 
+/** @brief Handle mute requests. @param params Query parameter on=1/0. @return JSON mute response. */
 HttpResponse ApiRouter::mute(const QueryParams& params) {
   if (!radio_) return requireRadio();
   const bool on = getParam(params, "on", nullptr, "1") != "0";
   return HttpResponse::json("{\"result\":\"ok\",\"muted\":" + boolean(radio_->mute(on)) + "}");
 }
 
+/** @brief Handle power requests. @param params Query parameter on=1/0. @return JSON power response. */
 HttpResponse ApiRouter::power(const QueryParams& params) {
   if (!radio_) return requireRadio();
   const bool on = getParam(params, "on", nullptr, "1") != "0";
   return HttpResponse::json("{\"result\":\"ok\",\"powered\":" + boolean(radio_->power(on)) + "}");
 }
 
+/** @brief Handle preset list/save/delete requests. @param params action/name/freq query parameters. @return JSON presets. */
 HttpResponse ApiRouter::presets(const QueryParams& params) {
   const std::string action = getParam(params, "action", nullptr, "list");
   if (action == "save") {

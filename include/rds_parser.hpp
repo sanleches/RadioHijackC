@@ -1,3 +1,19 @@
+/*
+ * =============================================================================
+ * RadioHijackC - RDS Parser Interface
+ * =============================================================================
+ *
+ * Purpose:
+ *   Declares the incremental parser for RDS station names and RadioText.
+ *
+ * Supported groups:
+ *   Group 0 - Program Service station name.
+ *   Group 2 - RadioText, including song/artist style messages.
+ *
+ * Main class:
+ *   RdsParser - Maintains RDS character buffers and publishes clean strings.
+ */
+
 /**
  * @file rds_parser.hpp
  * @brief Parser for RDS station name and RadioText groups from the RDA5807M.

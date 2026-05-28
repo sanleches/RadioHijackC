@@ -1,3 +1,23 @@
+/*
+ * =============================================================================
+ * RadioHijackC - RDA5807M Radio Driver Interface
+ * =============================================================================
+ *
+ * Purpose:
+ *   Declares the FM radio driver used by the dashboard and API.
+ *
+ * Hardware:
+ *   RDA5807M over I2C, default address 0x11, wired to Pico I2C0 on GP4/GP5.
+ *
+ * Features:
+ *   Power, tune, seek, volume, mute, RSSI/status, scanning, and RDS polling.
+ *
+ * Main types:
+ *   RadioStatus - Full status snapshot for API/serial output.
+ *   ScanStation - Frequency + RSSI result from scans.
+ *   Rda5807m    - High-level driver class.
+ */
+
 /**
  * @file rda5807m.hpp
  * @brief RDA5807M FM radio driver and high-level radio operations.

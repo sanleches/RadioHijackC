@@ -1,3 +1,20 @@
+/*
+ * =============================================================================
+ * RadioHijackC - Preset Store Interface
+ * =============================================================================
+ *
+ * Purpose:
+ *   Declares storage for named FM station presets.
+ *
+ * Storage model:
+ *   Presets are kept in RAM while running and persisted to the final flash
+ *   sector as a compact binary image. This replaces MicroPython presets.json.
+ *
+ * Main types:
+ *   Preset      - Name + frequency pair.
+ *   PresetStore - Load, save, add/update, delete, and list presets.
+ */
+
 /**
  * @file preset_store.hpp
  * @brief Flash-backed preset station storage.

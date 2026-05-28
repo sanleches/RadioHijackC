@@ -1,3 +1,25 @@
+/*
+ * =============================================================================
+ * RadioHijackC - Serial Status Console Interface
+ * =============================================================================
+ *
+ * Purpose:
+ *   Declares non-blocking USB serial status reporting for users who open the
+ *   serial port after boot and still need the dashboard address.
+ *
+ * Behavior:
+ *   Prints status at startup, every 60 seconds, and immediately when 's', 'S',
+ *   or '?' is received over USB serial.
+ *
+ * Main class:
+ *   SerialConsole - Poll-driven serial command/status helper.
+ */
+
+/**
+ * @file serial_console.hpp
+ * @brief Non-blocking USB serial status console.
+ */
+
 #pragma once
 
 #include "rda5807m.hpp"
@@ -7,13 +29,31 @@
 
 namespace app {
 
-// Non-blocking USB serial helper. It periodically repeats the dashboard URL and
-// also prints it immediately when the user sends 's', 'S', or '?' over serial.
+/**
+ * @brief Periodically reports network/radio status and handles serial commands.
+ */
 class SerialConsole {
  public:
+  /**
+   * @brief Construct a serial console bound to current radio and Wi-Fi state.
+   * @param radio Optional radio pointer. nullptr means radio initialization failed.
+   * @param wifi Wi-Fi manager reference used to report network mode and IP.
+   * @return Constructed console object.
+   */
   SerialConsole(Rda5807m* radio, const WifiManager& wifi);
 
+  /**
+   * @brief Service serial input and periodic status printing without blocking.
+   * @param None.
+   * @return Nothing.
+   */
   void poll();
+
+  /**
+   * @brief Print the current dashboard URL and radio status to USB serial.
+   * @param None.
+   * @return Nothing.
+   */
   void printStatus();
 
  private:

@@ -1,3 +1,17 @@
+/*
+ * =============================================================================
+ * RadioHijackC - URL Helper Interface
+ * =============================================================================
+ *
+ * Purpose:
+ *   Declares helpers for decoding browser query strings without pulling in a
+ *   heavyweight HTTP framework.
+ *
+ * Functions:
+ *   urlDecode()  - Converts '+', '%XX', and plain characters.
+ *   parseQuery() - Splits key=value&key2=value2 into a decoded map.
+ */
+
 /**
  * @file url.hpp
  * @brief URL decoding and HTTP query-string parsing helpers.

@@ -1,3 +1,26 @@
+/*
+ * =============================================================================
+ * RadioHijackC - RDA5807M Radio Driver Implementation
+ * =============================================================================
+ *
+ * Responsibilities:
+ *   Initialize I2C, configure the RDA5807M chip, implement tune/seek/power/
+ *   mute/volume/scan, read signal/status registers, and feed RDS blocks to the
+ *   parser.
+ *
+ * Frequency model:
+ *   87.0 MHz base, 100 kHz spacing, 87.0-108.0 MHz clamp.
+ *
+ * Important registers:
+ *   0x02 power/control, 0x03 channel/tune, 0x05 volume, 0x0A status,
+ *   0x0B RSSI, 0x0C-0x0F RDS blocks.
+ */
+
+/**
+ * @file rda5807m.cpp
+ * @brief RDA5807M I2C radio driver implementation.
+ */
+
 #include "rda5807m.hpp"
 
 #include "app_config.hpp"
@@ -11,10 +34,19 @@
 
 namespace app {
 
+/**
+ * @brief Store I2C bus configuration and default radio state.
+ * @param i2c Pico SDK I2C instance.
+ * @param sdaPin SDA GPIO.
+ * @param sclPin SCL GPIO.
+ * @param busFrequencyHz I2C clock in hertz.
+ * @return Constructed driver object.
+ */
 Rda5807m::Rda5807m(i2c_inst_t* i2c, uint sdaPin, uint sclPin, uint32_t busFrequencyHz)
     : i2c_(i2c), sdaPin_(sdaPin), sclPin_(sclPin), busFrequencyHz_(busFrequencyHz),
       volume_(config::kDefaultVolume), frequency_(config::kDefaultFrequencyMhz) {}
 
+/** @brief Initialize GPIO/I2C and configure the radio chip. @param None. @return true if initialization succeeded. */
 bool Rda5807m::begin() {
   i2c_init(i2c_, busFrequencyHz_);
   gpio_set_function(sdaPin_, GPIO_FUNC_I2C);
@@ -33,6 +65,7 @@ bool Rda5807m::begin() {
   return true;
 }
 
+/** @brief Write the power-up register sequence. @param None. @return true if required writes succeeded. */
 bool Rda5807m::initRadio() {
   if (!writeRegister(kRegPower, 0x0002)) {
     return false;
@@ -51,6 +84,7 @@ bool Rda5807m::initRadio() {
   return true;
 }
 
+/** @brief Enable or disable the radio. @param on true to power on. @return Current powered state. */
 bool Rda5807m::power(bool on) {
   if (on) {
     if (!powered_) {
@@ -67,6 +101,12 @@ bool Rda5807m::power(bool on) {
   return powered_;
 }
 
+/**
+ * @brief Tune to an FM frequency and clear stale RDS text.
+ * @param frequencyMhz Requested frequency in MHz.
+ * @param settleMs Delay after tuning before reading status.
+ * @return Current tracked frequency in MHz.
+ */
 float Rda5807m::tune(float frequencyMhz, uint32_t settleMs) {
   if (!powered_) {
     power(true);
@@ -84,6 +124,7 @@ float Rda5807m::tune(float frequencyMhz, uint32_t settleMs) {
   return frequency_;
 }
 
+/** @brief Seek in one direction until completion or timeout. @param up true for upward seek. @return Result frequency. */
 float Rda5807m::seek(bool up) {
   if (!powered_) {
     power(true);
@@ -105,6 +146,7 @@ float Rda5807m::seek(bool up) {
   return frequency_;
 }
 
+/** @brief Read and cache the current frequency from status. @param None. @return Current frequency in MHz. */
 float Rda5807m::currentFrequency() {
   uint16_t status = 0;
   if (readRegister(kRegStatus, status)) {
@@ -113,6 +155,7 @@ float Rda5807m::currentFrequency() {
   return frequency_;
 }
 
+/** @brief Clamp and write the volume nibble. @param volume Requested level 0-15. @return Applied level. */
 uint8_t Rda5807m::setVolume(int volume) {
   volume = std::min(15, std::max(0, volume));
   const uint16_t base = regVolume_ ? regVolume_ : 0x88A0;
@@ -121,6 +164,7 @@ uint8_t Rda5807m::setVolume(int volume) {
   return volume_;
 }
 
+/** @brief Set the DMUTE bit according to requested mute state. @param on true to mute. @return Current muted state. */
 bool Rda5807m::mute(bool on) {
   uint16_t reg2 = regPower_ ? regPower_ : static_cast<uint16_t>(kBitDhiz | kBitDmute | kBitRdsEn | kBitNewMethod | kBitEnable);
   if (on) {
@@ -133,6 +177,7 @@ bool Rda5807m::mute(bool on) {
   return muted_;
 }
 
+/** @brief Read one ready RDS group if available. @param None. @return true if decoded. */
 bool Rda5807m::pollRds() {
   if (!powered_) {
     return false;
@@ -148,6 +193,7 @@ bool Rda5807m::pollRds() {
   return rds_.process(blocks[0], blocks[1], blocks[2], blocks[3]);
 }
 
+/** @brief Build a complete dashboard/API status snapshot. @param None. @return RadioStatus data structure. */
 RadioStatus Rda5807m::status() {
   RadioStatus result;
   uint16_t statusReg = 0;
@@ -177,6 +223,14 @@ RadioStatus Rda5807m::status() {
   return result;
 }
 
+/**
+ * @brief Step through a frequency range and collect strong stations.
+ * @param start Start frequency in MHz.
+ * @param stop Stop frequency in MHz.
+ * @param step Step size in MHz.
+ * @param minRssi Minimum RSSI to include in results.
+ * @return Vector of matching stations.
+ */
 std::vector<ScanStation> Rda5807m::scan(float start, float stop, float step, uint8_t minRssi) {
   start = std::max(87.0f, start);
   stop = std::min(108.0f, stop);
@@ -197,6 +251,7 @@ std::vector<ScanStation> Rda5807m::scan(float start, float stop, float step, uin
   return found;
 }
 
+/** @brief Write a 16-bit register via I2C. @param reg Register address. @param value Register value. @return true on success. */
 bool Rda5807m::writeRegister(uint8_t reg, uint16_t value) {
   const uint8_t data[] = {reg, static_cast<uint8_t>((value >> 8) & 0xFF), static_cast<uint8_t>(value & 0xFF)};
   const int written = i2c_write_blocking(i2c_, kAddress, data, sizeof(data), false);
@@ -214,6 +269,7 @@ bool Rda5807m::writeRegister(uint8_t reg, uint16_t value) {
   return true;
 }
 
+/** @brief Read a 16-bit register via I2C. @param reg Register address. @param value Output value. @return true on success. */
 bool Rda5807m::readRegister(uint8_t reg, uint16_t& value) {
   if (i2c_write_blocking(i2c_, kAddress, &reg, 1, true) != 1) {
     return false;
@@ -226,6 +282,13 @@ bool Rda5807m::readRegister(uint8_t reg, uint16_t& value) {
   return true;
 }
 
+/**
+ * @brief Read multiple consecutive 16-bit registers.
+ * @param startReg First register address.
+ * @param count Number of registers.
+ * @param values Output array.
+ * @return true on success.
+ */
 bool Rda5807m::readRegisters(uint8_t startReg, uint8_t count, uint16_t* values) {
   if (i2c_write_blocking(i2c_, kAddress, &startReg, 1, true) != 1) {
     return false;
@@ -244,6 +307,7 @@ bool Rda5807m::readRegisters(uint8_t startReg, uint8_t count, uint16_t* values) 
   return true;
 }
 
+/** @brief Poll STC until set or timeout. @param timeoutMs Timeout in milliseconds. @return true if STC set. */
 bool Rda5807m::waitSeekTuneComplete(uint32_t timeoutMs) {
   const absolute_time_t deadline = make_timeout_time_ms(timeoutMs);
   while (!time_reached(deadline)) {
@@ -256,11 +320,13 @@ bool Rda5807m::waitSeekTuneComplete(uint32_t timeoutMs) {
   return false;
 }
 
+/** @brief Convert MHz to RDA channel index. @param frequencyMhz Frequency in MHz. @return Channel index. */
 uint16_t Rda5807m::channelForFrequency(float frequencyMhz) const {
   frequencyMhz = std::min(108.0f, std::max(87.0f, frequencyMhz));
   return static_cast<uint16_t>(std::lround((frequencyMhz - 87.0f) * 10.0f));
 }
 
+/** @brief Convert RDA channel index to MHz. @param channel Channel index. @return Frequency in MHz. */
 float Rda5807m::frequencyForChannel(uint16_t channel) const {
   return std::round((87.0f + static_cast<float>(channel & 0x03FF) * 0.1f) * 10.0f) / 10.0f;
 }
