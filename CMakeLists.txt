@@ -62,6 +62,7 @@ add_executable(RadioHijackC
         src/rda5807m.cpp
         src/rds_parser.cpp
         src/serial_console.cpp
+        src/status_led.cpp
         src/url.cpp
         src/web_page.cpp
         src/web_server.cpp

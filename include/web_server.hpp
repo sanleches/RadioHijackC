@@ -21,6 +21,7 @@
 
 #include "api_router.hpp"
 #include "serial_console.hpp"
+#include "status_led.hpp"
 
 namespace app {
 
@@ -33,9 +34,10 @@ class WebServer {
    * @brief Construct the HTTP server wrapper.
    * @param router API router that handles non-index routes.
    * @param serialConsole Serial console polled from the server loop.
+   * @param statusLed LED controller polled from the server loop.
    * @return Constructed server object.
    */
-  WebServer(ApiRouter& router, SerialConsole& serialConsole);
+  WebServer(ApiRouter& router, SerialConsole& serialConsole, StatusLed& statusLed);
 
   /**
    * @brief Start listening on the configured HTTP port and run forever.
@@ -47,6 +49,7 @@ class WebServer {
  private:
   ApiRouter& router_;
   SerialConsole& serialConsole_;
+  StatusLed& statusLed_;
 };
 
 }  // namespace app

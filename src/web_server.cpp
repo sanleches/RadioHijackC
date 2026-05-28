@@ -11,8 +11,8 @@
  *   onAccept() -> onReceive() -> buildResponse() -> sendMore() -> onSent().
  *
  * Main loop duties:
- *   Poll RDS data and serial console status while lwIP background mode handles
- *   network work.
+ *   Poll RDS data, serial console status, and LED heartbeat while lwIP
+ *   background mode handles network work.
  */
 
 /**
@@ -269,13 +269,14 @@ err_t onAccept(void* arg, tcp_pcb* newPcb, err_t error) {
 }  // namespace
 
 /**
- * @brief Store router and serial console references.
+ * @brief Store router, serial console, and status LED references.
  * @param router API router for HTTP requests.
  * @param serialConsole Console polled from the main server loop.
+ * @param statusLed LED controller polled from the main server loop.
  * @return Constructed server object.
  */
-WebServer::WebServer(ApiRouter& router, SerialConsole& serialConsole)
-    : router_(router), serialConsole_(serialConsole) {}
+WebServer::WebServer(ApiRouter& router, SerialConsole& serialConsole, StatusLed& statusLed)
+    : router_(router), serialConsole_(serialConsole), statusLed_(statusLed) {}
 
 /**
  * @brief Configure the raw TCP listener and run the firmware service loop.
@@ -316,6 +317,7 @@ void WebServer::serve() {
   while (true) {
     router_.pollRadioRds();
     serialConsole_.poll();
+    statusLed_.poll();
     sleep_ms(25);
   }
 }

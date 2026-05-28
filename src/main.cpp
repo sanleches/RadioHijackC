@@ -5,11 +5,12 @@
  *
  * Startup order:
  *   1. Initialize USB serial stdio.
- *   2. Load flash-backed presets.
- *   3. Initialize RDA5807M radio on I2C.
- *   4. Connect to Wi-Fi or start the fallback AP.
- *   5. Print dashboard status over serial.
- *   6. Start the HTTP server forever.
+ *   2. Initialize CYW43 Wi-Fi support and start fast LED boot blink.
+ *   3. Connect to Wi-Fi or start the fallback AP, selecting final LED pattern.
+ *   4. Load flash-backed presets.
+ *   5. Initialize RDA5807M radio on I2C.
+ *   6. Print dashboard status over serial.
+ *   7. Start the HTTP server forever.
  *
  * Owns:
  *   Top-level object lifetime and dependency wiring.
@@ -30,6 +31,7 @@
 #include "preset_store.hpp"
 #include "rda5807m.hpp"
 #include "serial_console.hpp"
+#include "status_led.hpp"
 #include "web_server.hpp"
 #include "wifi_manager.hpp"
 
@@ -49,6 +51,15 @@ int main() {
 
   app::Logger::info("Starting RadioHijack C++ firmware");
 
+  app::WifiManager wifi;
+  const bool wifiHardwareReady = wifi.begin();
+  app::StatusLed statusLed;
+  if (wifiHardwareReady) {
+    statusLed.setMode(app::StatusLed::Mode::Booting);
+  }
+
+  const std::string ipAddress = wifi.connectOrStartAccessPoint(statusLed);
+
   app::PresetStore presets;
   presets.load();
 
@@ -61,14 +72,11 @@ int main() {
     app::Logger::info("Warning: radio initialization failed. Check RDA5807M power, ground, SDA GP4, SCL GP5, and pull-ups.");
   }
 
-  app::WifiManager wifi;
-  const std::string ipAddress = wifi.connectOrStartAccessPoint();
-
   app::ApiRouter router(radioReady ? &radio : nullptr, presets, ipAddress);
   app::SerialConsole serialConsole(radioReady ? &radio : nullptr, wifi);
   serialConsole.printStatus();
 
-  app::WebServer server(router, serialConsole);
+  app::WebServer server(router, serialConsole, statusLed);
   server.serve();
 
   return 0;

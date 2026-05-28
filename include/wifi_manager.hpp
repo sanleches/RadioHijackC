@@ -22,6 +22,7 @@
 #pragma once
 
 #include "dhcp_server.hpp"
+#include "status_led.hpp"
 
 #include <string>
 
@@ -41,10 +42,10 @@ class WifiManager {
 
   /**
    * @brief Connect to configured Wi-Fi, or start the self-hosted AP if STA fails.
-   * @param None.
+   * @param statusLed LED controller used to show boot/connection progress and final mode.
    * @return IP address where the dashboard should be opened.
    */
-  std::string connectOrStartAccessPoint();
+  std::string connectOrStartAccessPoint(StatusLed& statusLed);
 
   /**
    * @brief Return the current dashboard IP address.
