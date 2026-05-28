@@ -76,6 +76,13 @@ pico_set_program_version(RadioHijackC "0.1")
 pico_enable_stdio_uart(RadioHijackC 0)
 pico_enable_stdio_usb(RadioHijackC 1)
 
+# Standalone-power safety: never wait for a USB host and never block firmware
+# progress trying to write serial logs when powered from a USB charger.
+target_compile_definitions(RadioHijackC PRIVATE
+        PICO_STDIO_USB_CONNECT_WAIT_TIMEOUT_MS=0
+        PICO_STDIO_USB_STDOUT_TIMEOUT_US=0
+)
+
 # Add the standard library to the build
 target_link_libraries(RadioHijackC
         pico_stdlib

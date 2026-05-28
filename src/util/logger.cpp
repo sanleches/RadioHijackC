@@ -4,11 +4,13 @@
  * =============================================================================
  *
  * Responsibilities:
- *   Write formatted status/debug lines to Pico stdio, which is USB serial for
- *   this firmware.
+ *   Write formatted status/debug lines to Pico stdio when a USB serial host is
+ *   actually connected.
  *
  * Design:
- *   Tiny wrapper around vprintf() so all modules use the same output path.
+ *   Tiny wrapper around vprintf() so all modules use the same output path. If
+ *   the device is powered from a USB charger, logging is skipped so firmware
+ *   startup and Wi-Fi work continue normally.
  */
 
 /**
@@ -21,6 +23,8 @@
 #include <cstdarg>
 #include <cstdio>
 
+#include "pico/stdio_usb.h"
+
 namespace app {
 
 /**
@@ -30,6 +34,10 @@ namespace app {
  * @return Nothing.
  */
 void Logger::info(const char* format, ...) {
+  if (!stdio_usb_connected()) {
+    return;
+  }
+
   va_list args;
   va_start(args, format);
   vprintf(format, args);
