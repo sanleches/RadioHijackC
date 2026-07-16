@@ -1,3 +1,5 @@
+<img width="2187" height="2197" alt="IMG_4478" src="https://github.com/user-attachments/assets/d31ca940-4161-4862-b23c-198ea18c0f92" />
+
 # RadioHijackC
 
 Raspberry Pi Pico 2 W firmware for controlling an RDA5807M FM radio module from a browser dashboard.
@@ -5,6 +7,9 @@ Raspberry Pi Pico 2 W firmware for controlling an RDA5807M FM radio module from 
 The project is a Pico SDK C++ rewrite of the original MicroPython version. It keeps the same main functionality: Wi-Fi dashboard, radio tune/seek/volume/mute/power, RDS station/text display, station scanning, and persistent presets.
 
 ## Hardware
+
+<img width="2136" height="1406" alt="E6C64F32-7856-457E-92FC-3D66DD42FFC2" src="https://github.com/user-attachments/assets/6039b4d8-29df-4935-94fc-448e61aa3acb" />
+
 
 - Board: Raspberry Pi Pico 2 W
 - Radio module: RDA5807M FM receiver
@@ -14,6 +19,8 @@ The project is a Pico SDK C++ rewrite of the original MicroPython version. It ke
 - I2C speed: `100 kHz`
 
 Connect the RDA5807M module to power, ground, `GP4` SDA, and `GP5` SCL. Use pull-ups if your module does not already include them.
+
+<img width="3024" height="4032" alt="IMG_4494" src="https://github.com/user-attachments/assets/3b508a95-621b-4520-b12a-e7a274833159" />
 
 ## Network Behavior
 
