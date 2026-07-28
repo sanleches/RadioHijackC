@@ -35,8 +35,8 @@ namespace app {
 namespace config {
 
 // Network used first. If STA connection fails, the firmware starts the fallback AP.
-inline constexpr const char* kWifiSsid = "BELL703";
-inline constexpr const char* kWifiPassword = "D632CE475EAC";
+inline constexpr const char* kWifiSsid = "YourApName";
+inline constexpr const char* kWifiPassword = "YourWifiPassword";
 
 inline constexpr const char* kApSsid = "RadioHijack-AP";
 inline constexpr const char* kApPassword = "radio1234";
